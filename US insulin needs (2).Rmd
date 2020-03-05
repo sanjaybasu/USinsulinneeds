@@ -1,0 +1,582 @@
+---
+title: "US insulin estimates"
+author: "Sanjay Basu"
+date: "3/3/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# install.packages("knitr")
+# install.packages("dplyr")
+# install.packages("nhanesA")
+# install.packages("fitdistrplus")
+# install.packages("readxl")
+# install.packages("MatchIt")
+# install.packages("mice")
+# install.packages("tableone")
+# install.packages("captioner")
+# install.packages("survey")
+ 
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warnings = FALSE)
+
+library(dplyr)
+library(nhanesA)
+library(fitdistrplus)
+library(readxl)
+library(readr)
+library(MatchIt)
+library(mice)
+library(tableone)
+library(captioner)
+library(survey)
+
+```
+
+## NHANES download and organize
+
+
+```{r nhanes assemble}
+demo_i <- nhanes('DEMO_I')
+diq_i <- nhanes('DIQ_I')
+ghb_i <- nhanes('GHB_I')
+glu_i <- nhanes('GLU_I')
+bpx_i <- nhanes('BPX_I')
+bpq_i <- nhanes('BPQ_I')
+mcq_i <- nhanes('MCQ_I')
+hdl_i <- nhanes('HDL_I')
+tchol_i <- nhanes('TCHOL_I')
+biopro_i <- nhanes('BIOPRO_I')
+albcr_i <- nhanes('ALB_CR_I')
+smq_i <- nhanes('SMQ_I')
+bmx_i <- nhanes('BMX_I')
+
+
+demo_h <- nhanes('DEMO_H')
+diq_h <- nhanes('DIQ_H')
+ghb_h <- nhanes('GHB_H')
+glu_h <- nhanes('GLU_H')
+bpx_h <- nhanes('BPX_H')
+bpq_h <- nhanes('BPQ_H')
+mcq_h <- nhanes('MCQ_H')
+hdl_h <- nhanes('HDL_H')
+tchol_h <- nhanes('TCHOL_H')
+biopro_h <- nhanes('BIOPRO_H')
+albcr_h <- nhanes('ALB_CR_H')
+smq_h <- nhanes('SMQ_H')
+bmx_h <- nhanes('BMX_H')
+
+
+demo_g <- nhanes('DEMO_G')
+diq_g <- nhanes('DIQ_G')
+ghb_g <- nhanes('GHB_G')
+glu_g <- nhanes('GLU_G')
+bpx_g <- nhanes('BPX_G')
+bpq_g <- nhanes('BPQ_G')
+mcq_g <- nhanes('MCQ_G')
+hdl_g <- nhanes('HDL_G')
+tchol_g <- nhanes('TCHOL_G')
+biopro_g <- nhanes('BIOPRO_G')
+albcr_g <- nhanes('ALB_CR_G')
+smq_g <- nhanes('SMQ_G')
+bmx_g <- nhanes('BMX_G')
+
+
+demo_f <- nhanes('DEMO_F')
+diq_f <- nhanes('DIQ_F')
+ghb_f <- nhanes('GHB_F')
+glu_f <- nhanes('GLU_F')
+bpx_f <- nhanes('BPX_F')
+bpq_f <- nhanes('BPQ_F')
+mcq_f <- nhanes('MCQ_F')
+hdl_f <- nhanes('HDL_F')
+tchol_f <- nhanes('TCHOL_F')
+biopro_f <- nhanes('BIOPRO_F')
+albcr_f <- nhanes('ALB_CR_F')
+smq_f <- nhanes('SMQ_F')
+bmx_f <- nhanes('BMX_F')
+
+
+demo_e <- nhanes('DEMO_E')
+diq_e <- nhanes('DIQ_E')
+ghb_e <- nhanes('GHB_E')
+glu_e <- nhanes('GLU_E')
+bpx_e <- nhanes('BPX_E')
+bpq_e <- nhanes('BPQ_E')
+mcq_e <- nhanes('MCQ_E')
+hdl_e <- nhanes('HDL_E')
+tchol_e <- nhanes('TCHOL_E')
+biopro_e <- nhanes('BIOPRO_E')
+albcr_e <- nhanes('ALB_CR_E')
+smq_e <- nhanes('SMQ_E')
+bmx_e <- nhanes('BMX_E')
+
+
+demo_d <- nhanes('DEMO_D')
+diq_d <- nhanes('DIQ_D')
+ghb_d <- nhanes('GHB_D')
+glu_d <- nhanes('GLU_D')
+bpx_d <- nhanes('BPX_D')
+bpq_d <- nhanes('BPQ_D')
+mcq_d <- nhanes('MCQ_D')
+hdl_d <- nhanes('HDL_D')
+tchol_d <- nhanes('TCHOL_D')
+biopro_d <- nhanes('BIOPRO_D')
+albcr_d <- nhanes('ALB_CR_D')
+smq_d <- nhanes('SMQ_D')
+bmx_d <- nhanes('BMX_D')
+
+
+
+nhanes1516 <- left_join(demo_i, diq_i, by = c('SEQN'))
+nhanes1516 <- left_join(nhanes1516,ghb_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,glu_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,bpx_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,bpq_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,mcq_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,hdl_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,tchol_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,biopro_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,albcr_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,smq_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,bmx_i, by = c('SEQN'))
+
+nhanes1314 <- left_join(demo_h, diq_h, by = c('SEQN'))
+nhanes1314 <- left_join(nhanes1314,ghb_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,glu_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,bpx_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,bpq_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,mcq_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,hdl_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,tchol_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,biopro_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,albcr_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,smq_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,bmx_h, by = c('SEQN'))
+
+nhanes1112 <- left_join(demo_g, diq_g, by = c('SEQN'))
+nhanes1112 <- left_join(nhanes1112,ghb_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,glu_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,bpx_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,bpq_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,mcq_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,hdl_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,tchol_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,biopro_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,albcr_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,smq_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,bmx_g, by = c('SEQN'))
+
+nhanes0910 <- left_join(demo_f, diq_f, by = c('SEQN'))
+nhanes0910 <- left_join(nhanes0910,ghb_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,glu_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,bpx_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,bpq_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,mcq_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,hdl_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,tchol_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,biopro_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,albcr_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,smq_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,bmx_f, by = c('SEQN'))
+
+nhanes0708 <- left_join(demo_e, diq_e, by = c('SEQN'))
+nhanes0708 <- left_join(nhanes0708,ghb_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,glu_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,bpx_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,bpq_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,mcq_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,hdl_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,tchol_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,biopro_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,albcr_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,smq_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,bmx_e, by = c('SEQN'))
+
+nhanes0506 <- left_join(demo_d, diq_d, by = c('SEQN'))
+nhanes0506 <- left_join(nhanes0506,ghb_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,glu_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,bpx_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,bpq_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,mcq_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,hdl_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,tchol_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,biopro_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,albcr_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,smq_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,bmx_d, by = c('SEQN'))
+
+
+nhanes0506  = nhanes0506 %>%
+  mutate(year = 2005)
+nhanes0708  = nhanes0708 %>%
+  mutate(year = 2007)
+nhanes0910  = nhanes0910 %>%
+  mutate(year = 2009)
+nhanes1112 = nhanes1112 %>%
+  mutate(year = 2011)
+nhanes1314 = nhanes1314 %>%
+  mutate(year = 2013)
+nhanes1516 = nhanes1516 %>%
+  mutate(year = 2015)
+nhanes <- bind_rows(nhanes1314,nhanes1516)
+nhanes <- bind_rows(nhanes,nhanes1112)
+nhanes <- bind_rows(nhanes,nhanes0910)
+nhanes <- bind_rows(nhanes,nhanes0708)
+nhanes <- bind_rows(nhanes,nhanes0506)
+
+nhanes <- nhanes %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040") %>%
+  as_tibble()
+
+# age, female, black, sbp, bprx, oraldmrx, cvd_hx_baseline,hba1c,chol,hdl,screat,uacr
+rm(nhanes0910,nhanes1112,nhanes1314,nhanes1516,demo_g,demo_h,demo_i,demo_f,diq_g,diq_h,diq_i,diq_f,ghb_g,ghb_h,ghb_i,ghb_f,glu_g,glu_h,glu_i,glu_f,bpx_g,bpx_h,bpx_i,bpx_f)
+save(nhanes,file="nhanes")
+
+```
+
+## NHANES A1c distributions
+
+```{r nhanes a1c distribs}
+load("nhanes")
+nhanes$dm = (nhanes$DIQ010==1) | 
+  (nhanes$LBXGH>=6.5) | 
+  (nhanes$LBXGLU>=126)
+nhanes <- nhanes[which(nhanes$dm==1), ]
+nhanescomp = nhanes[(complete.cases(nhanes$WTSAF2YR)&complete.cases(nhanes$LBXGH)),]
+table(nhanescomp$dm)
+
+
+# a1c values among diagnosed and treated with insulin
+a1cdist_dx_rxins = fitdist(nhanescomp$LBXGH[nhanescomp$DIQ050==1], "lnorm", method="mme",weights=round(nhanescomp$WTSAF2YR[nhanescomp$DIQ050==1]/3))
+set.seed(100)
+a1csamp_dx_rxins=rlnorm(1e5,meanlog=a1cdist_dx_rxins$estimate[1],sdlog = a1cdist_dx_rxins$estimate[2])
+quantile(a1csamp_dx_rxins,c(.025,.5,.975))
+mean(a1csamp_dx_rxins)
+
+# a1c values among diagnosed and treated with only orals
+a1cdist_dx_rxoral = fitdist(as.numeric(na.omit(nhanescomp$LBXGH[(nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2)])), "lnorm", method="mme",weights=as.numeric(na.omit(round(nhanescomp$WTSAF2YR[(nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2)]/3))))
+set.seed(100)
+a1csamp_dx_rxoral=rlnorm(1e5,meanlog=a1cdist_dx_rxoral$estimate[1],sdlog = a1cdist_dx_rxoral$estimate[2])
+quantile(a1csamp_dx_rxoral,c(.025,.5,.975))
+mean(a1csamp_dx_rxoral)
+
+# a1c values among diagnosed and untreated
+a1cdist_dx_norx = fitdist(as.numeric(na.omit(nhanescomp$LBXGH[(nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2)])), "lnorm", method="mme",weights=as.numeric(na.omit(round(nhanescomp$WTSAF2YR[(nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2)]/3))))
+set.seed(100)
+a1csamp_dx_norx=rlnorm(1e5,meanlog=a1cdist_dx_norx$estimate[1],sdlog = a1cdist_dx_norx$estimate[2])
+quantile(a1csamp_dx_norx,c(.025,.5,.975))
+mean(a1csamp_dx_norx)
+
+# a1c values among undiagnosed 
+a1cdist_nodx = fitdist(as.numeric(na.omit(nhanescomp$LBXGH[(nhanescomp$DIQ010==2)])), "lnorm", method="mme",weights=as.numeric(na.omit(round(nhanescomp$WTSAF2YR[(nhanescomp$DIQ010==2)]/3))))
+set.seed(100)
+a1csamp_nodx=rlnorm(1e5,meanlog=a1cdist_nodx$estimate[1],sdlog = a1cdist_nodx$estimate[2])
+quantile(a1csamp_nodx,c(.025,.5,.975))
+mean(a1csamp_nodx)
+```
+
+
+# Demographic change approach: 
+
+Demographic change approach: multiply number of people with diagnosed diabetes from 2020-2030 (from IDF estimates) by proportion of people anticipated to be treated with insulin given current estimates (from NHANES) by amount of insulin per person (given distribution of body weights in NHANES).
+
+
+```{r approach 1}
+
+
+# https://diabetesatlas.org/data/en/country/211/us.html
+undx = .381
+total_dm_19 = 30987.90*1000
+total_dm_30 = 34374.20*1000
+
+type2prop = 0.93
+type2proplo = 0.9
+type2prophi = 0.95
+
+proponins1 = sum(nhanescomp$DIQ050==1)/length(nhanescomp$DIQ050)
+
+total_dm = total_dm_19 + (total_dm_30-total_dm_19)/(30-19)*(1:11)
+
+# number of people with diagnosed type 2 dm
+  n_dm1=(1-undx)*total_dm*type2prop
+  n_dmlo1=(1-undx)*total_dm*type2proplo
+  n_dmhi1=(1-undx)*total_dm*type2prophi
+
+# units per person on insulin per day
+# The body weight-based dosing estimated that 75% of those treated with insulin 
+# require basal insulin only at a dosage of 0.4 IU/kg/day, 
+# while the remaining individuals require multiple dose injection therapy 
+# totaling 0.6 IU/kg/day.
+
+unitsperday_1 = (0.75*0.4+0.25*0.2)*mean(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]))*proponins1
+unitsperdaylo_1 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.025))*proponins1
+unitsperdayhi_1 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.975))*proponins1
+
+
+# total units across entire population of people with diagnosed type 2 dm per year
+  vialsperyear_1=unitsperday_1*n_dm1*365.25/1000
+  vialsperyearlo_1=unitsperdaylo_1*n_dmlo1*365.25/1000
+  vialsperyearhi_1=unitsperdayhi_1*n_dmhi1*365.25/1000
+
+
+```
+
+
+
+# Demographic change plus improved insulin access: 
+calculate additional number of people with diabetes not yet on insulin who would be diagnosed if US reached highest OECD country diagnosis level (UK, at 81.5% diagnosis per IDF Diabetes Atlas 9th edition). Estimate insulin necessary given current ADA-EASD guidelines (i.e. start with metformin, then either metformin+ SU, +TZD, +DPP-4, +SGLT-2, or +GLP-1RA). The base case should target HbA1c of 7%. [Sensitivity analyses not yet done: (i) For increased age or significant comorbidities, loosen target to 8%. (ii) try three orals before insulin. ]
+
+```{r approach 2}
+
+#a1c values among those not on insulin, if maximally treated on orals
+#titrate those on orals to max dose with effect of -2.5%/2
+#those not on orals or undiagnosed need to be with effect of -2.5% 
+a1c_after_orals = nhanescomp$LBXGH
+a1c_after_orals[is.na(a1c_after_orals)] = mean(a1c_after_orals,na.omit=T)
+nhanescomp$DIQ070[is.na(nhanescomp$DIQ070)] = 9
+nhanescomp$DIQ050[is.na(nhanescomp$DIQ050)] = 9
+nhanescomp$DIQ010[is.na(nhanescomp$DIQ010)] = 9
+
+a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] = a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] - 2.5/2
+a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] = a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] - 2.5
+
+
+# total proportion of people who would now be treated with insulin = 
+# proportion already on insulin + 81.5% of proportion w/ a1c >7% after oral therapy
+
+proponins2 = sum(nhanescomp$DIQ050==1)/length(nhanescomp$DIQ050) + 0.815*(table(a1c_after_orals>7)/length(a1c_after_orals))[2]
+
+
+
+  n_dm2=total_dm*type2prop
+  n_dmlo2=total_dm*type2proplo
+  n_dmhi2=total_dm*type2prophi
+
+
+# units per person on insulin per day
+# The body weight-based dosing estimated that 75% of those treated with insulin 
+# require basal insulin only at a dosage of 0.4 IU/kg/day, 
+# while the remaining individuals require multiple dose injection therapy 
+# totaling 0.6 IU/kg/day.
+
+unitsperday_2 = (0.75*0.4+0.25*0.2)*mean(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]))*proponins2
+unitsperdaylo_2 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.025))*proponins2
+unitsperdayhi_2 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.975))*proponins2
+
+# total units across entire population per year
+  vialsperyear_2=unitsperday_2*n_dm2*365.25/1000
+  vialsperyearlo_2=unitsperdaylo_2*n_dmlo2*365.25/1000
+  vialsperyearhi_2=unitsperdayhi_2*n_dmhi2*365.25/1000
+
+
+
+```
+
+
+#  Match NHANES People to MEPS to get imputed insulin dispensed
+
+```{r match}
+
+meps <- read_csv("mepsdiab021220.csv")
+
+meps = meps[meps$cover_whole_yr==1,]
+
+# meps$days = meps$TOTDAYS
+# meps$days[is.na(meps$days)] = 1
+meps$units = meps$TOTDOSE
+# meps$units[is.na(meps$units)] = 0
+meps$unitsperday = (meps$units/365)
+meps$unitsperday[meps$unitsperday<=0] = 'NA'
+meps$unitsperday[meps$unitsperday=='Inf'] = 'NA'
+
+# meps$DIABAGED[meps$DIABAGED<0]=0
+
+mat_nhanes = nhanescomp %>%
+  mutate(baseline_age = RIDAGEYR,
+         female = (RIAGENDR==2),
+         black = (RIDRETH1==4),
+         hisp = (RIDRETH1<3),
+         tob = (SMQ040<3),
+         sbp = BPXSY1,
+         bprx = (BPQ050A==1),
+        oraldmrx = (DIQ070==1),
+        anti_coag = 0,
+        cvd_hx_baseline = ((MCQ160E==1)|(MCQ160F==1)),
+        hba1c = LBXGH,
+        chol = LBXTC,
+        hdl = LBDHDD,
+        screat = LBXSCR,
+        uacr = URDACT,
+        alt = LBXSATSI,
+        wt = BMXWT,
+        yrsdiab =  (baseline_age - DID040),
+        unitsperday = 0) %>%
+  dplyr::select(baseline_age,
+                female,
+                black,
+                hisp,
+                tob,
+                sbp,
+                bprx,
+                oraldmrx,
+                anti_coag,
+                cvd_hx_baseline,
+                hba1c,
+                chol,
+                hdl,
+                screat,
+                uacr,
+                alt,
+                wt,
+                yrsdiab,
+                unitsperday)
+
+mat_nhanes$yrsdiab[mat_nhanes$yrsdiab<0] = 'NA'
+mat_nhanes$yrsdiab = as.numeric(mat_nhanes$yrsdiab)
+mat_nhanes$group = 1
+mat_nhanes_imp = mice(mat_nhanes,m=1,maxit=10,meth='pmm',seed=1)
+mat_nhanes_comp = complete(mat_nhanes_imp)
+
+meps$DIABAGED = as.numeric(meps$DIABAGED)
+meps$DIABAGED[meps$DIABAGED<0] = 0
+
+mat_meps = meps %>%
+  mutate(baseline_age = age,
+         female = (SEX==2),
+         black = (racex==2),
+         hisp = 0,
+         tob = 0,
+         sbp =0,
+         bprx = 0,
+          oraldmrx = 0,
+          anti_coag = 0,
+          cvd_hx_baseline = 0,
+          hba1c = 0,
+          chol = 0, 
+          hdl = 0,
+          screat = 0,
+          uacr = 0,
+          alt = 0,
+          wt = 0,
+         yrsdiab = age - DIABAGED) %>%
+  dplyr::select(baseline_age,
+                female,
+                black,
+                hisp,
+                tob,
+                sbp,
+                bprx,
+                oraldmrx,
+                anti_coag,
+                cvd_hx_baseline,
+                hba1c,
+                chol,
+                hdl,
+                screat,
+                uacr,
+                alt,
+                wt,
+                yrsdiab,
+                unitsperday)
+mat_meps$yrsdiab[mat_meps$yrsdiab<0]=0
+mat_meps$group = 0
+
+mat_meps$unitsperday = as.numeric(mat_meps$unitsperday)
+
+mat_meps_imp = mice(mat_meps,m=1,maxit=10,meth='pmm',seed=1)
+mat_meps_comp = complete(mat_meps_imp)
+
+df = rbind(mat_nhanes_comp,mat_meps_comp)
+
+set.seed(1)
+match.it <- matchit(group ~ baseline_age + female + black + yrsdiab, data = df, method="nearest", replace = T, caliper = 0.05, ratio = 2)
+a <- summary(match.it)
+matcheddf <- match.data(match.it)
+
+table1 <- CreateTableOne(vars = c('baseline_age', 'female', 'black', 'yrsdiab'), 
+                         data = df, 
+                         factorVars = c('female','black'), 
+                         strata = 'group')
+table1 <- print(table1, 
+                printToggle = FALSE, 
+                noSpaces = TRUE, smd = TRUE)
+knitr::kable(table1[,c(1,2,3,5)],  
+      align = 'c', 
+      caption = 'Table 1: Comparison of unmatched samples')
+
+knitr::kable(a$nn, digits = 2, align = 'c', 
+      caption = 'Table 2: Sample sizes')
+
+table_match1 <- CreateTableOne(vars = c('baseline_age', 'female', 'black', 'yrsdiab'),strata = "group",data = matcheddf,test = FALSE)
+table3 <- print(table_match1, 
+                printToggle = FALSE, 
+                noSpaces = TRUE, smd = TRUE)
+knitr::kable(table3,  
+      align = 'c', 
+      caption = 'Table 3: Summary of balance for matched data')
+
+
+
+```
+
+
+#   Calculate difference between estimated insulin needs (2020-2030) and imputed (based on current 2018 utilization).
+
+
+```{r diff}
+
+pairsdf = cbind(df[row.names(match.it$match.matrix),"wt"], df[match.it$match.matrix,"unitsperday"], df[row.names(match.it$match.matrix),"hba1c"])
+
+pairsdf[,2][pairsdf[,2]>(mean(pairsdf[,2],na.rm=T)+sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
+pairsdf[,1][pairsdf[,1]>(mean(pairsdf[,1],na.rm=T)+sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
+pairsdf[,2][pairsdf[,2]<(mean(pairsdf[,2],na.rm=T)-sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
+pairsdf[,1][pairsdf[,1]<(mean(pairsdf[,1],na.rm=T)-sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
+
+a1c_after_orals = pairsdf[,3]
+a1c_after_orals[is.na(a1c_after_orals)] = mean(a1c_after_orals,na.omit=T)
+nhanescomp$DIQ070[is.na(nhanescomp$DIQ070)] = 9
+nhanescomp$DIQ050[is.na(nhanescomp$DIQ050)] = 9
+nhanescomp$DIQ010[is.na(nhanescomp$DIQ010)] = 9
+
+
+a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] = a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] - 2.5/2
+a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] = a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] - 2.5
+
+wt = pairsdf[,1]
+need = 0*(a1c_after_orals<7) + ((0.75*0.4+0.25*0.2)*wt)*(a1c_after_orals>=7)
+summary(need)
+
+
+# needed minus used
+used = pairsdf[,2]
+summary(used)
+diff_need_minus_use = need - used
+summary(diff_need_minus_use)
+
+# proportion over versus under treated
+sum((diff_need_minus_use<=0),na.rm = T)/length(diff_need_minus_use)
+summary(diff_need_minus_use[((diff_need_minus_use<=0))])
+
+
+sum((diff_need_minus_use>0),na.rm = T)/length(diff_need_minus_use)
+summary(diff_need_minus_use[((diff_need_minus_use>0))])
+
+
+# a1c distribution in each group
+
+summary(a1c_after_orals[((diff_need_minus_use<=0))])
+
+summary(a1c_after_orals[((diff_need_minus_use>0))])
+
+# weight distribution in each group
+summary(wt[((diff_need_minus_use<=0))])
+
+summary(wt[((diff_need_minus_use>0))])
+
+
+
+```
+
+
+
+
