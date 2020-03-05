@@ -25,9 +25,15 @@ In this study, we sought to estimate present and future population-level insulin
 
 References
 
+
 1	Hua X, Carvalho N, Tew M, Huang ES, Herman WH, Clarke P. Expenditures and Prices of Antihyperglycemic Medications in the United States: 2002-2013. JAMA 2016; 315. DOI:10.1001/jama.2016.0126.
+
 2	Luo J, Avorn J, Kesselheim AS. Trends in Medicaid Reimbursements for Insulin From 1991 Through 2014. JAMA Intern Med 2015; 175. DOI:10.1001/jamainternmed.2015.4338.
+
 3	Herkert D, Vijayakumar P, Luo J, et al. Cost-Related Insulin Underuse Among Patients With Diabetes. JAMA Intern Med 2019; 179. DOI:10.1001/jamainternmed.2018.5008.
+
 4	Fralick M, Kesselheim AS. The U.S. Insulin Crisis - Rationing a Lifesaving Medication Discovered in the 1920s. N Engl J Med 2019; 381. DOI:10.1056/NEJMp1909402.
+
 5	Luo J, Kesselheim AS, Greene J, Lipska KJ. Strategies to Improve the Affordability of Insulin in the USA. The lancet Diabetes & endocrinology 2017; 5. DOI:10.1016/S2213-8587(17)30041-4.
+
 6	Vijan S, Sussman JB, Yudkin JS, Hayward RA. Effect of Patients’ Risks and Preferences on Health Gains With Plasma Glucose Level Lowering in Type 2 Diabetes Mellitus. JAMA Intern Med 2014; 174. DOI:10.1001/jamainternmed.2014.2894.
