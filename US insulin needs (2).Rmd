@@ -16,9 +16,13 @@ output: html_document
 # install.packages("tableone")
 # install.packages("captioner")
 # install.packages("survey")
- 
+# install.packages("data.table")
+# install.packages("formattable")
+# install.packages("stargazer")
+# install.packages("ggplot2")
+# install.packages("plyr")
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warnings = FALSE)
-
+#setwd("~/Box/Research/Research projects/Insulin/US insulin needs")
 library(dplyr)
 library(nhanesA)
 library(fitdistrplus)
@@ -29,13 +33,56 @@ library(mice)
 library(tableone)
 library(captioner)
 library(survey)
+library(data.table)
+library(formattable)
+library(stargazer)
+library(ggplot2)
+library(plyr)
+
 
 ```
+## 4t analysis of units per weight
+
+```{r 4t}
+JYdataset01 <- read_csv("JY4TData/JYdataset01.csv")
+JYdataset02 <- read_csv("JY4TData/JYdataset02.csv")
+fourt= JYdataset01 %>%
+  left_join(JYdataset02,by=c("Patient_ID" = "Patient_ID"))
+summary(as.numeric(fourt$ins1)/fourt$weight0)
+fourt$ins1 = as.numeric(fourt$ins1)
+fourt$ins0 = as.numeric(fourt$ins0)
+fourt$a1c1 = as.numeric(fourt$a1c1)
+fourt$a1c0 = as.numeric(fourt$a1c0)
+fourt$a1cd = fourt$a1c1-fourt$a1c0
+fourt$met1 = as.numeric(fourt$met1)
+fourt$sulf1 = as.numeric(fourt$sulf1)
+fourt$insd = fourt$ins1-fourt$ins0
+fourt$race = as.factor(fourt$race)
+
+reg1  = lm(a1cd~weight0+ins1+age+female+as.factor(race)+met1+sulf1, data=fourt)
+summary(reg1)
+
+star.1 <- stargazer(reg1,
+                    title="Multivariable regression from the 4-T Study",
+                    align=TRUE,
+                    type = "text",
+                    style = "default",
+                    ci=TRUE,
+                    ci.level=0.95,
+                    single.row=T
+                    )
+knitr::kable(star.1)
+
+
+```
+
 
 ## NHANES download and organize
 
 
 ```{r nhanes assemble}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warnings = FALSE)
+
 demo_i <- nhanes('DEMO_I')
 diq_i <- nhanes('DIQ_I')
 ghb_i <- nhanes('GHB_I')
@@ -225,56 +272,178 @@ nhanes <- bind_rows(nhanes,nhanes0708)
 nhanes <- bind_rows(nhanes,nhanes0506)
 
 nhanes <- nhanes %>%
-  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040") %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA") %>%
   as_tibble()
 
 # age, female, black, sbp, bprx, oraldmrx, cvd_hx_baseline,hba1c,chol,hdl,screat,uacr
-rm(nhanes0910,nhanes1112,nhanes1314,nhanes1516,demo_g,demo_h,demo_i,demo_f,diq_g,diq_h,diq_i,diq_f,ghb_g,ghb_h,ghb_i,ghb_f,glu_g,glu_h,glu_i,glu_f,bpx_g,bpx_h,bpx_i,bpx_f)
+#rm(nhanes0910,nhanes1112,nhanes1314,nhanes1516,demo_g,demo_h,demo_i,demo_f,diq_g,diq_h,diq_i,diq_f,ghb_g,ghb_h,ghb_i,ghb_f,glu_g,glu_h,glu_i,glu_f,bpx_g,bpx_h,bpx_i,bpx_f)
 save(nhanes,file="nhanes")
+
 
 ```
 
 ## NHANES A1c distributions
 
 ```{r nhanes a1c distribs}
+
+
 load("nhanes")
-nhanes$dm = (nhanes$DIQ010==1) | 
-  (nhanes$LBXGH>=6.5) | 
-  (nhanes$LBXGLU>=126)
-nhanes <- nhanes[which(nhanes$dm==1), ]
-nhanescomp = nhanes[(complete.cases(nhanes$WTSAF2YR)&complete.cases(nhanes$LBXGH)),]
-table(nhanescomp$dm)
+
+dfn = nhanes[(complete.cases(nhanes$WTSAF2YR)&complete.cases(nhanes$LBXGH)),]
+
+dfn$persWeight <- dfn$WTSAF2YR/6
+dfn$psu        <- dfn$SDMVPSU
+dfn$strata     <- dfn$SDMVSTRA
 
 
-# a1c values among diagnosed and treated with insulin
-a1cdist_dx_rxins = fitdist(nhanescomp$LBXGH[nhanescomp$DIQ050==1], "lnorm", method="mme",weights=round(nhanescomp$WTSAF2YR[nhanescomp$DIQ050==1]/3))
-set.seed(100)
-a1csamp_dx_rxins=rlnorm(1e5,meanlog=a1cdist_dx_rxins$estimate[1],sdlog = a1cdist_dx_rxins$estimate[2])
-quantile(a1csamp_dx_rxins,c(.025,.5,.975))
-mean(a1csamp_dx_rxins)
+dfn$dm = (dfn$DIQ010==1) | 
+  (dfn$LBXGH>=6.5) | 
+  (dfn$LBXGLU>=126)
+dfn <- dfn[which(dfn$dm==1), ]
+table(dfn$dm)
 
-# a1c values among diagnosed and treated with only orals
-a1cdist_dx_rxoral = fitdist(as.numeric(na.omit(nhanescomp$LBXGH[(nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2)])), "lnorm", method="mme",weights=as.numeric(na.omit(round(nhanescomp$WTSAF2YR[(nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2)]/3))))
-set.seed(100)
-a1csamp_dx_rxoral=rlnorm(1e5,meanlog=a1cdist_dx_rxoral$estimate[1],sdlog = a1cdist_dx_rxoral$estimate[2])
-quantile(a1csamp_dx_rxoral,c(.025,.5,.975))
-mean(a1csamp_dx_rxoral)
+dfn$dx = dfn$DIQ010
+dfn$oral = dfn$DIQ070
+dfn$ins = dfn$DIQ050
+dfn$oral[is.na(dfn$DIQ070)]=2
+dfn$ins[is.na(dfn$DIQ050)]=2
+dfn$dx[dfn$dx==3]=2
+dfn$dx[dfn$dx==9]=2
+dfn$oral[dfn$oral==9]=2
+dfn$ins[dfn$ins==9]=2
 
-# a1c values among diagnosed and untreated
-a1cdist_dx_norx = fitdist(as.numeric(na.omit(nhanescomp$LBXGH[(nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2)])), "lnorm", method="mme",weights=as.numeric(na.omit(round(nhanescomp$WTSAF2YR[(nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2)]/3))))
-set.seed(100)
-a1csamp_dx_norx=rlnorm(1e5,meanlog=a1cdist_dx_norx$estimate[1],sdlog = a1cdist_dx_norx$estimate[2])
-quantile(a1csamp_dx_norx,c(.025,.5,.975))
-mean(a1csamp_dx_norx)
+dfn$grp = 1*(dfn$dx==2)+#undiagnosed
+  2*(dfn$dx==1)*(dfn$oral==2)*(dfn$ins==2)+#diagnosed and untreated
+  3*(dfn$dx==1)*(dfn$oral==1)*(dfn$ins==2)+#diagnosed and non-insulin rx only
+  4*(dfn$dx==1)*(dfn$ins==1) #diagnosed and insulin rx
 
-# a1c values among undiagnosed 
-a1cdist_nodx = fitdist(as.numeric(na.omit(nhanescomp$LBXGH[(nhanescomp$DIQ010==2)])), "lnorm", method="mme",weights=as.numeric(na.omit(round(nhanescomp$WTSAF2YR[(nhanescomp$DIQ010==2)]/3))))
-set.seed(100)
-a1csamp_nodx=rlnorm(1e5,meanlog=a1cdist_nodx$estimate[1],sdlog = a1cdist_nodx$estimate[2])
-quantile(a1csamp_nodx,c(.025,.5,.975))
-mean(a1csamp_nodx)
+
+dfn$agedx = dfn$DID040
+#dfn$agedx[dfn$agedx>80]='NA'
+
+dfn$durdx = dfn$RIDAGEYR-as.numeric(dfn$agedx)
+dfn$durdx[dfn$durdx<0]=0
+
+dfnDesign <- svydesign(id      = ~psu,
+                          strata  = ~strata,
+                          weights = ~persWeight,
+                          nest    = TRUE,
+                          data    = dfn)
+
+# TABLE 1
+table(dfn$grp)
+table(dfn$grp)/sum(table(dfn$grp))
+svytable(~grp, dfnDesign)
+svytable(~grp, dfnDesign)/sum(svytable(~grp, dfnDesign))
+svyby(~RIDAGEYR,~grp,dfnDesign, svymean)
+svyby(~RIDAGEYR,~grp,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F)
+svytable(~RIAGENDR+grp,dfnDesign)/as.data.frame(svytable(~grp, dfnDesign))$Freq
+svytable(~RIDRETH1+grp, dfnDesign)/as.data.frame(svytable(~grp, dfnDesign))$Freq
+svyby(~durdx,~grp,dfnDesign, svymean, na.rm=T)
+#svyby(~durdx,~grp,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F, na.rm=T)
+svyby(~LBXGH,~grp,dfnDesign, svymean, na.rm=T)
+svyby(~LBXGH,~grp,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F, na.rm=T)
+svyby(~LBXGLU,~grp,dfnDesign, svymean, na.rm=T)
+svyby(~LBXGLU,~grp,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F, na.rm=T)
+svyby(~BMXWT,~grp,dfnDesign, svymean, na.rm=T)
+svyby(~BMXWT,~grp,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F,na.rm=T)
+
+
+# TABLE 2
+dfn$basea1c =  1*(dfn$dx==2)*(dfn$LBXGH>7)+#undiagnosed
+  2*(dfn$dx==1)*(dfn$oral==2)*(dfn$ins==2)*(dfn$LBXGH>7)+#diagnosed and untreated
+  3*(dfn$dx==1)*(dfn$oral==1)*(dfn$ins==2)*(dfn$LBXGH>7)+#diagnosed and non-insulin rx only
+  4*(dfn$dx==1)*(dfn$ins==1)*(dfn$LBXGH>7) #diagnosed and insulin rx
+
+dfn$grpa1c = 1*(dfn$dx==2)*(dfn$LBXGH-2.5>7)+#undiagnosed
+  2*(dfn$dx==1)*(dfn$oral==2)*(dfn$ins==2)*((dfn$LBXGH-2.5)>7)+#diagnosed and untreated
+  3*(dfn$dx==1)*(dfn$oral==1)*(dfn$ins==2)*((dfn$LBXGH-(2.5/2))>7)+#diagnosed and non-insulin rx only
+  4*(dfn$dx==1)*(dfn$ins==1)*((dfn$LBXGH-(2.5/2)*(table(dfn$oral,dfn$ins)[1,2]/sum(table(dfn$oral,dfn$ins))))>7) #diagnosed and insulin rx
+
+dfn$newa1coral = (dfn$grpa1c==1)*(dfn$LBXGH-2.5)+
+  (dfn$grpa1c==2)*(dfn$LBXGH-2.5)+
+  (dfn$grpa1c==3)*(dfn$LBXGH-(2.5/2))+
+  (dfn$grpa1c==4)*(dfn$LBXGH-((2.5/2)*(table(dfn$oral,dfn$ins)[1,2]/sum(table(dfn$oral,dfn$ins)))))
+  
+dfn$delta = (dfn$newa1coral-7)
+dfn$delta[dfn$delta<0] = 0
+
+dfn$insneed = dfn$BMXWT*0.6419
+
+dfnDesign <- svydesign(id      = ~psu,
+                          strata  = ~strata,
+                          weights = ~persWeight,
+                          nest    = TRUE,
+                          data    = dfn)
+
+
+sum(dfn$basea1c>0)
+table(dfn$basea1c)
+table(dfn$basea1c)/sum(dfn$basea1c>0)
+svytable(~basea1c, dfnDesign)
+svytable(~basea1c, dfnDesign)/(svytable(~basea1c>0, dfnDesign))[2]
+svyby(~LBXGH,~basea1c>0,dfnDesign, svymean, na.rm=T)
+svyby(~LBXGH,~basea1c,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F)
+
+sum(dfn$grpa1c>0)
+table(dfn$grpa1c)
+table(dfn$grpa1c)/sum(dfn$grpa1c>0)
+svytable(~grpa1c, dfnDesign)
+svytable(~grpa1c, dfnDesign)/(svytable(~grpa1c>0, dfnDesign))[2]
+svyby(~newa1coral,~grpa1c,dfnDesign, svymean, na.rm=T)
+svyby(~newa1coral,~grpa1c,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F)
+svyby(~BMXWT,~grpa1c,dfnDesign, svymean, na.rm=T)
+svyby(~BMXWT,~grpa1c,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F)
+quantile(dfn$BMXWT[dfn$grpa1c==2],quantiles=c(.25,.75),na.rm=T)
+quantile(dfn$BMXWT[dfn$grpa1c==4],quantiles=c(.25,.75),na.rm=T)
+svyby(~insneed,~grpa1c,dfnDesign, svymean, na.rm=T)
+svyby(~insneed,~grpa1c,dfnDesign, svyquantile,quantiles=c(.25,.75),keep.var=F)
+quantile(dfn$insneed[dfn$grpa1c==2],quantiles=c(.25,.75),na.rm=T)
+quantile(dfn$insneed[dfn$grpa1c==4],quantiles=c(.25,.75),na.rm=T)
+
+svyby(~BMXWT,~grpa1c>0,dfnDesign, svymean, na.rm=T)
+svyby(~BMXWT,~grpa1c>0,dfnDesign,svyquantile,quantiles=c(.25,.75),keep.var=F,na.rm=T)
+
+svyby(~insneed,~grpa1c>0,dfnDesign, svymean, na.rm=T)
+svyby(~insneed,~grpa1c>0,dfnDesign,svyquantile,quantiles=c(.25,.75),keep.var=F,na.rm=T)
+
 ```
 
+# Insulin secular trend
+
+```{r secular trend in insulin use}
+nhanes0506$dm = (nhanes0506$DIQ010==1) | 
+  (nhanes0506$LBXGH>=6.5) | 
+  (nhanes0506$LBXGLU>=126)
+
+nhanes0708$dm = (nhanes0708$DIQ010==1) | 
+  (nhanes0708$LBXGH>=6.5) | 
+  (nhanes0708$LBXGLU>=126)
+
+nhanes0910$dm = (nhanes0910$DIQ010==1) | 
+  (nhanes0910$LBXGH>=6.5) | 
+  (nhanes0910$LBXGLU>=126)
+
+nhanes1112$dm = (nhanes1112$DIQ010==1) | 
+  (nhanes1112$LBXGH>=6.5) | 
+  (nhanes1112$LBXGLU>=126)
+
+nhanes1314$dm = (nhanes1314$DIQ010==1) | 
+  (nhanes1314$LBXGH>=6.5) | 
+  (nhanes1314$LBXGLU>=126)
+
+nhanes1516$dm = (nhanes1516$DIQ010==1) | 
+  (nhanes1516$LBXGH>=6.5) | 
+  (nhanes1516$LBXGLU>=126)
+
+table(nhanes0506$DIQ050==1,nhanes0506$dm==1)[2,2]/sum(nhanes0506$dm==1,na.rm=T)
+table(nhanes0708$DIQ050==1,nhanes0708$dm==1)[2,2]/sum(nhanes0708$dm==1,na.rm=T)
+table(nhanes0910$DIQ050==1,nhanes0910$dm==1)[2,2]/sum(nhanes0910$dm==1,na.rm=T)
+table(nhanes1112$DIQ050==1,nhanes1112$dm==1)[2,2]/sum(nhanes1112$dm==1,na.rm=T)
+table(nhanes1314$DIQ050==1,nhanes1314$dm==1)[2,2]/sum(nhanes1314$dm==1,na.rm=T)
+table(nhanes1516$DIQ050==1,nhanes1516$dm==1)[2,2]/sum(nhanes1516$dm==1,na.rm=T)
+
+```
 
 # Demographic change approach: 
 
@@ -293,7 +462,7 @@ type2prop = 0.93
 type2proplo = 0.9
 type2prophi = 0.95
 
-proponins1 = sum(nhanescomp$DIQ050==1)/length(nhanescomp$DIQ050)
+proponins = 0.216
 
 total_dm = total_dm_19 + (total_dm_30-total_dm_19)/(30-19)*(1:11)
 
@@ -302,21 +471,19 @@ total_dm = total_dm_19 + (total_dm_30-total_dm_19)/(30-19)*(1:11)
   n_dmlo1=(1-undx)*total_dm*type2proplo
   n_dmhi1=(1-undx)*total_dm*type2prophi
 
-# units per person on insulin per day
-# The body weight-based dosing estimated that 75% of those treated with insulin 
-# require basal insulin only at a dosage of 0.4 IU/kg/day, 
-# while the remaining individuals require multiple dose injection therapy 
-# totaling 0.6 IU/kg/day.
-
-unitsperday_1 = (0.75*0.4+0.25*0.2)*mean(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]))*proponins1
-unitsperdaylo_1 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.025))*proponins1
-unitsperdayhi_1 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.975))*proponins1
+# 4t study regression
+  
+unitsperday_1 = (0.6419)*svymean(~BMXWT,dfnDesign,na.rm=T)[1]
+unitsperdaylo_1 = (0.6419)*svyquantile(~BMXWT,dfnDesign,quantiles=c(.025),na.rm=T)[1]
+unitsperdayhi_1 = (0.6419)*svyquantile(~BMXWT,dfnDesign,quantiles=c(.975),na.rm=T)[1]
 
 
-# total units across entire population of people with diagnosed type 2 dm per year
-  vialsperyear_1=unitsperday_1*n_dm1*365.25/1000
-  vialsperyearlo_1=unitsperdaylo_1*n_dmlo1*365.25/1000
-  vialsperyearhi_1=unitsperdayhi_1*n_dmhi1*365.25/1000
+# total vials across entire population of people with diagnosed type 2 dm per year
+  vialsperyear_1=proponins*unitsperday_1*n_dm1*365.25/1000
+  vialsperyearlo_1=proponins*unitsperdaylo_1*n_dmlo1*365.25/1000
+  vialsperyearhi_1=proponins*unitsperdayhi_1*n_dmhi1*365.25/1000
+
+
 
 
 ```
@@ -328,47 +495,56 @@ calculate additional number of people with diabetes not yet on insulin who would
 
 ```{r approach 2}
 
-#a1c values among those not on insulin, if maximally treated on orals
-#titrate those on orals to max dose with effect of -2.5%/2
-#those not on orals or undiagnosed need to be with effect of -2.5% 
-a1c_after_orals = nhanescomp$LBXGH
-a1c_after_orals[is.na(a1c_after_orals)] = mean(a1c_after_orals,na.omit=T)
-nhanescomp$DIQ070[is.na(nhanescomp$DIQ070)] = 9
-nhanescomp$DIQ050[is.na(nhanescomp$DIQ050)] = 9
-nhanescomp$DIQ010[is.na(nhanescomp$DIQ010)] = 9
 
-a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] = a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] - 2.5/2
-a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] = a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] - 2.5
+undx= 1-0.815
 
 
-# total proportion of people who would now be treated with insulin = 
-# proportion already on insulin + 81.5% of proportion w/ a1c >7% after oral therapy
-
-proponins2 = sum(nhanescomp$DIQ050==1)/length(nhanescomp$DIQ050) + 0.815*(table(a1c_after_orals>7)/length(a1c_after_orals))[2]
-
+  n_dm2=(1-undx)*total_dm*type2prop
+  n_dmlo2=(1-undx)*total_dm*type2proplo
+  n_dmhi2=(1-undx)*total_dm*type2prophi
 
 
-  n_dm2=total_dm*type2prop
-  n_dmlo2=total_dm*type2proplo
-  n_dmhi2=total_dm*type2prophi
-
-
-# units per person on insulin per day
-# The body weight-based dosing estimated that 75% of those treated with insulin 
-# require basal insulin only at a dosage of 0.4 IU/kg/day, 
-# while the remaining individuals require multiple dose injection therapy 
-# totaling 0.6 IU/kg/day.
-
-unitsperday_2 = (0.75*0.4+0.25*0.2)*mean(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]))*proponins2
-unitsperdaylo_2 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.025))*proponins2
-unitsperdayhi_2 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanescomp$DIQ050==1]),c(.975))*proponins2
+unitsperday_2 = (0.6419)*svymean(~BMXWT,dfnDesign,na.rm=T)[1]
+unitsperdaylo_2 = (0.6419)*svyquantile(~BMXWT,dfnDesign,quantiles=c(.025),na.rm=T)[1]
+unitsperdayhi_2 = (0.6419)*svyquantile(~BMXWT,dfnDesign,quantiles=c(.975),na.rm=T)[1]
 
 # total units across entire population per year
-  vialsperyear_2=unitsperday_2*n_dm2*365.25/1000
-  vialsperyearlo_2=unitsperdaylo_2*n_dmlo2*365.25/1000
-  vialsperyearhi_2=unitsperdayhi_2*n_dmhi2*365.25/1000
+  vialsperyear_2=unitsperday_2*n_dm2*365.25/1000*proponins
+  vialsperyearlo_2=unitsperdaylo_2*n_dmlo2*365.25/1000*proponins
+  vialsperyearhi_2=unitsperdayhi_2*n_dmhi2*365.25/1000*proponins
 
+# table demo only  
+yr = 2020:2030
+dfneed=data.table::data.table(yr,
+                           total_dm*type2prop,
+                           n_dm1,
+                           n_dm2,
+                           n_dm1*proponins,
+                           n_dm2*proponins,
+                           vialsperyear_1,
+                           vialsperyear_2)
 
+dfneedlo=data.table::data.table(yr,
+                           total_dm*type2proplo,
+                           n_dmlo1,
+                           n_dmlo2,
+                           n_dmlo1*proponins,
+                           n_dmlo2*proponins,
+                           vialsperyearlo_1,
+                           vialsperyearlo_2)
+
+dfneedhi=data.table::data.table(yr,
+                                total_dm*type2prophi,
+                                n_dmhi1,
+                                n_dmhi2,
+                                n_dmhi1*proponins,
+                                n_dmhi2*proponins,
+                                vialsperyearhi_1,
+                                vialsperyearhi_2)
+
+formattable(dfneed)
+formattable(dfneedlo)
+formattable(dfneedhi)
 
 ```
 
@@ -379,7 +555,6 @@ unitsperdayhi_2 = (0.75*0.4+0.25*0.2)*quantile(na.omit(nhanescomp$BMXWT[nhanesco
 
 meps <- read_csv("mepsdiab021220.csv")
 
-meps = meps[meps$cover_whole_yr==1,]
 
 # meps$days = meps$TOTDAYS
 # meps$days[is.na(meps$days)] = 1
@@ -389,9 +564,12 @@ meps$unitsperday = (meps$units/365)
 meps$unitsperday[meps$unitsperday<=0] = 'NA'
 meps$unitsperday[meps$unitsperday=='Inf'] = 'NA'
 
+meps$unitsperday[meps$cover_whole_yr!=1] = 'NA'
+
+
 # meps$DIABAGED[meps$DIABAGED<0]=0
 
-mat_nhanes = nhanescomp %>%
+mat_nhanes = dfn %>%
   mutate(baseline_age = RIDAGEYR,
          female = (RIAGENDR==2),
          black = (RIDRETH1==4),
@@ -410,7 +588,8 @@ mat_nhanes = nhanescomp %>%
         alt = LBXSATSI,
         wt = BMXWT,
         yrsdiab =  (baseline_age - DID040),
-        unitsperday = 0) %>%
+        unitsperday = 0,
+        postoral  = newa1coral) %>%
   dplyr::select(baseline_age,
                 female,
                 black,
@@ -429,7 +608,8 @@ mat_nhanes = nhanescomp %>%
                 alt,
                 wt,
                 yrsdiab,
-                unitsperday)
+                unitsperday,
+                postoral)
 
 mat_nhanes$yrsdiab[mat_nhanes$yrsdiab<0] = 'NA'
 mat_nhanes$yrsdiab = as.numeric(mat_nhanes$yrsdiab)
@@ -458,7 +638,8 @@ mat_meps = meps %>%
           uacr = 0,
           alt = 0,
           wt = 0,
-         yrsdiab = age - DIABAGED) %>%
+         yrsdiab = age - DIABAGED,
+         postoral=0) %>%
   dplyr::select(baseline_age,
                 female,
                 black,
@@ -477,7 +658,8 @@ mat_meps = meps %>%
                 alt,
                 wt,
                 yrsdiab,
-                unitsperday)
+                unitsperday,
+                postoral)
 mat_meps$yrsdiab[mat_meps$yrsdiab<0]=0
 mat_meps$group = 0
 
@@ -489,7 +671,7 @@ mat_meps_comp = complete(mat_meps_imp)
 df = rbind(mat_nhanes_comp,mat_meps_comp)
 
 set.seed(1)
-match.it <- matchit(group ~ baseline_age + female + black + yrsdiab, data = df, method="nearest", replace = T, caliper = 0.05, ratio = 2)
+match.it <- matchit(group ~ baseline_age + female + black + yrsdiab, data = df, method="nearest", replace = T, caliper = 0.01, ratio = 1)
 a <- summary(match.it)
 matcheddf <- match.data(match.it)
 
@@ -507,7 +689,7 @@ knitr::kable(table1[,c(1,2,3,5)],
 knitr::kable(a$nn, digits = 2, align = 'c', 
       caption = 'Table 2: Sample sizes')
 
-table_match1 <- CreateTableOne(vars = c('baseline_age', 'female', 'black', 'yrsdiab'),strata = "group",data = matcheddf,test = FALSE)
+table_match1 <- CreateTableOne(vars = c('baseline_age', 'female', 'black', 'yrsdiab'),strata = "group",data = matcheddf,test = T)
 table3 <- print(table_match1, 
                 printToggle = FALSE, 
                 noSpaces = TRUE, smd = TRUE)
@@ -525,58 +707,139 @@ knitr::kable(table3,
 
 ```{r diff}
 
-pairsdf = cbind(df[row.names(match.it$match.matrix),"wt"], df[match.it$match.matrix,"unitsperday"], df[row.names(match.it$match.matrix),"hba1c"])
+pairsdf = cbind(df[row.names(match.it$match.matrix),"wt"], df[match.it$match.matrix,"unitsperday"], df[row.names(match.it$match.matrix),"hba1c"],
+                df[row.names(match.it$match.matrix),"baseline_age"],
+                df[row.names(match.it$match.matrix),"female"],
+                df[row.names(match.it$match.matrix),"black"],
+                df[row.names(match.it$match.matrix),"postoral"])
 
-pairsdf[,2][pairsdf[,2]>(mean(pairsdf[,2],na.rm=T)+sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
-pairsdf[,1][pairsdf[,1]>(mean(pairsdf[,1],na.rm=T)+sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
-pairsdf[,2][pairsdf[,2]<(mean(pairsdf[,2],na.rm=T)-sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
-pairsdf[,1][pairsdf[,1]<(mean(pairsdf[,1],na.rm=T)-sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
+# pairsdf[,2][pairsdf[,2]>(mean(pairsdf[,2],na.rm=T)+sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
+# pairsdf[,1][pairsdf[,1]>(mean(pairsdf[,1],na.rm=T)+sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
+# pairsdf[,2][pairsdf[,2]<(mean(pairsdf[,2],na.rm=T)-sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
+# pairsdf[,1][pairsdf[,1]<(mean(pairsdf[,1],na.rm=T)-sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
 
-a1c_after_orals = pairsdf[,3]
-a1c_after_orals[is.na(a1c_after_orals)] = mean(a1c_after_orals,na.omit=T)
-nhanescomp$DIQ070[is.na(nhanescomp$DIQ070)] = 9
-nhanescomp$DIQ050[is.na(nhanescomp$DIQ050)] = 9
-nhanescomp$DIQ010[is.na(nhanescomp$DIQ010)] = 9
+pairdfsub = pairsdf[pairsdf[,3]>7,]
+
+a1c_before_orals = pairdfsub[,3]
+# dfn$DIQ070[is.na(dfn$DIQ070)] = 9
+# dfn$DIQ050[is.na(dfn$DIQ050)] = 9
+# dfn$DIQ010[is.na(dfn$DIQ010)] = 9
+
+a1c_after_orals = pairdfsub[,7]
+a1c_after_orals[a1c_after_orals==0] = a1c_before_orals[a1c_after_orals==0]
+
+wt = pairdfsub[,1]
+
+age = pairdfsub[,4]
+fem = pairdfsub[,5]
+blk = pairdfsub[,6]
 
 
-a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] = a1c_after_orals[((nhanescomp$DIQ070==1)&(nhanescomp$DIQ050==2))] - 2.5/2
-a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] = a1c_after_orals[(((nhanescomp$DIQ070==2)&(nhanescomp$DIQ050==2) | (nhanescomp$DIQ010==2)))] - 2.5
-
-wt = pairsdf[,1]
-need = 0*(a1c_after_orals<7) + ((0.75*0.4+0.25*0.2)*wt)*(a1c_after_orals>=7)
+need = (0.6419)*wt
 summary(need)
 
+used = pairdfsub[,2]
 
-# needed minus used
-used = pairsdf[,2]
 summary(used)
-diff_need_minus_use = need - used
-summary(diff_need_minus_use)
+diff_disp_minus_need = used - need
+table(overrx==1)
+table(underrx==1)
+
+summary(diff_disp_minus_need)
+quantile(diff_disp_minus_need,c(.025,.975),na.rm=T)
 
 # proportion over versus under treated
-sum((diff_need_minus_use<=0),na.rm = T)/length(diff_need_minus_use)
-summary(diff_need_minus_use[((diff_need_minus_use<=0))])
+
+overrx = (used>(need+2*sd(need)))&(need>0)
+underrx = (used<(need-2*sd(need)))&(need>0)
+           
+         
+sum(underrx==1)/length(diff_disp_minus_need)
+summary(diff_disp_minus_need[underrx==1])
+quantile(diff_disp_minus_need[underrx==1],c(.025,.975),na.rm=T)
 
 
-sum((diff_need_minus_use>0),na.rm = T)/length(diff_need_minus_use)
-summary(diff_need_minus_use[((diff_need_minus_use>0))])
+sum(overrx==1)/length(diff_disp_minus_need)
+summary(diff_disp_minus_need[overrx==1])
+quantile(diff_disp_minus_need[overrx==1],c(.025,.975),na.rm=T)
+
+
+summary(need[underrx==1])
+quantile(need[underrx==1],c(.025,.975),na.rm=T)
+
+summary(need[overrx==1])
+quantile(need[overrx==1],c(.025,.975),na.rm=T)
+
+
+summary(used[underrx==1])
+quantile(used[underrx==1],c(.025,.975),na.rm=T)
+
+summary(used[overrx==1])
+quantile(used[overrx==1],c(.025,.975),na.rm=T)
 
 
 # a1c distribution in each group
+summary(a1c_before_orals[underrx==1])
+quantile(a1c_before_orals[underrx==1],c(.025,.975),na.rm=T)
 
-summary(a1c_after_orals[((diff_need_minus_use<=0))])
+summary(a1c_before_orals[overrx==1])
+quantile(a1c_before_orals[overrx==1],c(.025,.975),na.rm=T)
 
-summary(a1c_after_orals[((diff_need_minus_use>0))])
 
-# weight distribution in each group
-summary(wt[((diff_need_minus_use<=0))])
+summary(a1c_after_orals[underrx==1])
+quantile(a1c_after_orals[underrx==1],c(.025,.975),na.rm=T)
 
-summary(wt[((diff_need_minus_use>0))])
+summary(a1c_after_orals[overrx==1])
+quantile(a1c_after_orals[overrx==1],c(.025,.975),na.rm=T)
 
+summary(wt[underrx==1])
+quantile(wt[underrx==1],c(.025,.975),na.rm=T)
+
+summary(wt[overrx==1])
+quantile(wt[overrx==1],c(.025,.975),na.rm=T)
+
+
+summary(age[underrx==1])
+quantile(age[underrx==1],c(.025,.975),na.rm=T)
+
+summary(age[overrx==1])
+quantile(age[overrx==1],c(.025,.975),na.rm=T)
+
+table(fem[underrx==1])
+table(fem[underrx==1])/length(fem[underrx==1])
+
+table(fem[overrx==1])
+table(fem[overrx==1])/length(fem[overrx==1])
+
+table(blk[underrx==1])
+table(blk[underrx==1])/length(blk[underrx==1])
+
+table(blk[overrx==1])
+table(blk[overrx==1])/length(blk[overrx==1])
+
+
+
+
+save.image("USinsulin")
+```
+
+#   Hist
+
+
+```{r hist}
+
+df = data.frame(diff = diff_disp_minus_need,used=used,need=need)
+p<-ggplot(df, aes(x=diff)) +
+  geom_histogram(color="dodgerblue", fill="white",position="identity")
+mu = ddply(df,"need",summarise, grp.sd=sd(need))
+p+ scale_color_grey() + theme_classic()+
+  labs(title="Difference between insulin dispensed and estimated need",x="Dispensed minus estimated need (IU/person/day)", y = "Count")+
+  geom_vline(data=mu, aes(xintercept=-30.8, color='gray'),
+             linetype="dashed")+
+  geom_vline(data=mu, aes(xintercept=30.8, color='gray'),
+             linetype="dashed")+
+  theme(legend.position="none")
 
 
 ```
-
-
-
 
