@@ -96,6 +96,7 @@ biopro_i <- nhanes('BIOPRO_I')
 albcr_i <- nhanes('ALB_CR_I')
 smq_i <- nhanes('SMQ_I')
 bmx_i <- nhanes('BMX_I')
+hiq_i <- nhanes('HIQ_I')
 
 
 demo_h <- nhanes('DEMO_H')
@@ -111,6 +112,7 @@ biopro_h <- nhanes('BIOPRO_H')
 albcr_h <- nhanes('ALB_CR_H')
 smq_h <- nhanes('SMQ_H')
 bmx_h <- nhanes('BMX_H')
+hiq_h <- nhanes('HIQ_H')
 
 
 demo_g <- nhanes('DEMO_G')
@@ -126,6 +128,7 @@ biopro_g <- nhanes('BIOPRO_G')
 albcr_g <- nhanes('ALB_CR_G')
 smq_g <- nhanes('SMQ_G')
 bmx_g <- nhanes('BMX_G')
+hiq_g <- nhanes('HIQ_G')
 
 
 demo_f <- nhanes('DEMO_F')
@@ -141,6 +144,7 @@ biopro_f <- nhanes('BIOPRO_F')
 albcr_f <- nhanes('ALB_CR_F')
 smq_f <- nhanes('SMQ_F')
 bmx_f <- nhanes('BMX_F')
+hiq_f <- nhanes('HIQ_F')
 
 
 demo_e <- nhanes('DEMO_E')
@@ -156,6 +160,7 @@ biopro_e <- nhanes('BIOPRO_E')
 albcr_e <- nhanes('ALB_CR_E')
 smq_e <- nhanes('SMQ_E')
 bmx_e <- nhanes('BMX_E')
+hiq_e <- nhanes('HIQ_E')
 
 
 demo_d <- nhanes('DEMO_D')
@@ -171,6 +176,7 @@ biopro_d <- nhanes('BIOPRO_D')
 albcr_d <- nhanes('ALB_CR_D')
 smq_d <- nhanes('SMQ_D')
 bmx_d <- nhanes('BMX_D')
+hiq_d <- nhanes('HIQ_D')
 
 
 
@@ -186,6 +192,7 @@ nhanes1516 <-   left_join(nhanes1516,biopro_i, by = c('SEQN'))
 nhanes1516 <-   left_join(nhanes1516,albcr_i, by = c('SEQN'))
 nhanes1516 <-   left_join(nhanes1516,smq_i, by = c('SEQN'))
 nhanes1516 <-   left_join(nhanes1516,bmx_i, by = c('SEQN'))
+nhanes1516 <-   left_join(nhanes1516,hiq_i, by = c('SEQN'))
 
 nhanes1314 <- left_join(demo_h, diq_h, by = c('SEQN'))
 nhanes1314 <- left_join(nhanes1314,ghb_h, by = c('SEQN'))
@@ -199,6 +206,7 @@ nhanes1314 <-   left_join(nhanes1314,biopro_h, by = c('SEQN'))
 nhanes1314 <-   left_join(nhanes1314,albcr_h, by = c('SEQN'))
 nhanes1314 <-   left_join(nhanes1314,smq_h, by = c('SEQN'))
 nhanes1314 <-   left_join(nhanes1314,bmx_h, by = c('SEQN'))
+nhanes1314 <-   left_join(nhanes1314,hiq_h, by = c('SEQN'))
 
 nhanes1112 <- left_join(demo_g, diq_g, by = c('SEQN'))
 nhanes1112 <- left_join(nhanes1112,ghb_g, by = c('SEQN'))
@@ -212,6 +220,7 @@ nhanes1112 <-  left_join(nhanes1112,biopro_g, by = c('SEQN'))
 nhanes1112 <-  left_join(nhanes1112,albcr_g, by = c('SEQN'))
 nhanes1112 <-  left_join(nhanes1112,smq_g, by = c('SEQN'))
 nhanes1112 <-  left_join(nhanes1112,bmx_g, by = c('SEQN'))
+nhanes1112 <-  left_join(nhanes1112,hiq_g, by = c('SEQN'))
 
 nhanes0910 <- left_join(demo_f, diq_f, by = c('SEQN'))
 nhanes0910 <- left_join(nhanes0910,ghb_f, by = c('SEQN'))
@@ -225,6 +234,7 @@ nhanes0910 <-  left_join(nhanes0910,biopro_f, by = c('SEQN'))
 nhanes0910 <-  left_join(nhanes0910,albcr_f, by = c('SEQN'))
 nhanes0910 <-  left_join(nhanes0910,smq_f, by = c('SEQN'))
 nhanes0910 <-  left_join(nhanes0910,bmx_f, by = c('SEQN'))
+nhanes0910 <-  left_join(nhanes0910,hiq_f, by = c('SEQN'))
 
 nhanes0708 <- left_join(demo_e, diq_e, by = c('SEQN'))
 nhanes0708 <- left_join(nhanes0708,ghb_e, by = c('SEQN'))
@@ -238,6 +248,7 @@ nhanes0708 <-  left_join(nhanes0708,biopro_e, by = c('SEQN'))
 nhanes0708 <-  left_join(nhanes0708,albcr_e, by = c('SEQN'))
 nhanes0708 <-  left_join(nhanes0708,smq_e, by = c('SEQN'))
 nhanes0708 <-  left_join(nhanes0708,bmx_e, by = c('SEQN'))
+nhanes0708 <-  left_join(nhanes0708,hiq_e, by = c('SEQN'))
 
 nhanes0506 <- left_join(demo_d, diq_d, by = c('SEQN'))
 nhanes0506 <- left_join(nhanes0506,ghb_d, by = c('SEQN'))
@@ -251,6 +262,7 @@ nhanes0506 <-  left_join(nhanes0506,biopro_d, by = c('SEQN'))
 nhanes0506 <-  left_join(nhanes0506,albcr_d, by = c('SEQN'))
 nhanes0506 <-  left_join(nhanes0506,smq_d, by = c('SEQN'))
 nhanes0506 <-  left_join(nhanes0506,bmx_d, by = c('SEQN'))
+nhanes0506 <-  left_join(nhanes0506,hiq_d, by = c('SEQN'))
 
 
 nhanes0506  = nhanes0506 %>%
@@ -265,15 +277,44 @@ nhanes1314 = nhanes1314 %>%
   mutate(year = 2013)
 nhanes1516 = nhanes1516 %>%
   mutate(year = 2015)
-nhanes <- bind_rows(nhanes1314,nhanes1516)
-nhanes <- bind_rows(nhanes,nhanes1112)
-nhanes <- bind_rows(nhanes,nhanes0910)
-nhanes <- bind_rows(nhanes,nhanes0708)
-nhanes <- bind_rows(nhanes,nhanes0506)
 
-nhanes <- nhanes %>%
-  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA") %>%
+nhanes1516 <- nhanes1516 %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA","BMXWAIST", "HIQ031B", "HIQ031D","INDFMPIR") %>%
   as_tibble()
+
+nhanes1314 <- nhanes1314 %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA","BMXWAIST", "HIQ031B", "HIQ031D","INDFMPIR") %>%
+  as_tibble()
+
+
+nhanes1112 <- nhanes1112 %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA","BMXWAIST", "HIQ031B", "HIQ031D","INDFMPIR") %>%
+  as_tibble()
+
+nhanes0910 <- nhanes0910 %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA","BMXWAIST", "HIQ031B", "HIQ031D","INDFMPIR") %>%
+  as_tibble()
+
+nhanes0708 <- nhanes0708 %>%
+  mutate(DIQ070 = DID070,
+         URDACT = URXUMS/URXUCR) %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA","BMXWAIST", "HIQ031B", "HIQ031D","INDFMPIR") %>%
+  as_tibble() 
+
+nhanes0506 <- nhanes0506  %>%
+  mutate(DIQ070 = DID070,
+         URDACT = URXUMS/URXUCR) %>%
+  dplyr::select("RIDAGEYR","RIAGENDR","RIDRETH1", "BMXWT","URDACT","SMQ040","BPXSY1","BPQ050A","LBDHDD","LBXTC","LBXSCR", "MCQ160E","MCQ160F", "DIQ010","LBXGH","WTSAF2YR","LBXGLU","DIQ050","DIQ070","LBXSATSI","DID040", "INDFMPIR", "WTINT2YR", "SDMVPSU", "SDMVSTRA","BMXWAIST", "HIQ031B", "HIQ031D","INDFMPIR") %>%
+  as_tibble() 
+
+
+nhanes <- rbind(nhanes1314,nhanes1516)
+nhanes <- rbind(nhanes,nhanes1112)
+nhanes <- rbind(nhanes,nhanes0910)
+nhanes <- rbind(nhanes,nhanes0708)
+nhanes <- rbind(nhanes,nhanes0506)
+
+
 
 # age, female, black, sbp, bprx, oraldmrx, cvd_hx_baseline,hba1c,chol,hdl,screat,uacr
 #rm(nhanes0910,nhanes1112,nhanes1314,nhanes1516,demo_g,demo_h,demo_i,demo_f,diq_g,diq_h,diq_i,diq_f,ghb_g,ghb_h,ghb_i,ghb_f,glu_g,glu_h,glu_i,glu_f,bpx_g,bpx_h,bpx_i,bpx_f)
@@ -589,7 +630,11 @@ mat_nhanes = dfn %>%
         wt = BMXWT,
         yrsdiab =  (baseline_age - DID040),
         unitsperday = 0,
-        postoral  = newa1coral) %>%
+        postoral  = newa1coral,
+        wc = BMXWAIST,
+        mcare = (HIQ031B==15),
+        mcaid = (HIQ031D==17),
+        pir = INDFMPIR) %>%
   dplyr::select(baseline_age,
                 female,
                 black,
@@ -609,7 +654,11 @@ mat_nhanes = dfn %>%
                 wt,
                 yrsdiab,
                 unitsperday,
-                postoral)
+                postoral,
+                wc,
+                mcare,
+                mcaid,
+                pir)
 
 mat_nhanes$yrsdiab[mat_nhanes$yrsdiab<0] = 'NA'
 mat_nhanes$yrsdiab = as.numeric(mat_nhanes$yrsdiab)
@@ -639,7 +688,11 @@ mat_meps = meps %>%
           alt = 0,
           wt = 0,
          yrsdiab = age - DIABAGED,
-         postoral=0) %>%
+         postoral=0,
+        wc = 0,
+        mcare = 0,
+        mcaid = 0,
+        pir = 0) %>%
   dplyr::select(baseline_age,
                 female,
                 black,
@@ -659,7 +712,11 @@ mat_meps = meps %>%
                 wt,
                 yrsdiab,
                 unitsperday,
-                postoral)
+                postoral,
+                wc,
+                mcare,
+                mcaid,
+                pir)
 mat_meps$yrsdiab[mat_meps$yrsdiab<0]=0
 mat_meps$group = 0
 
@@ -671,6 +728,9 @@ mat_meps_comp = complete(mat_meps_imp)
 df = rbind(mat_nhanes_comp,mat_meps_comp)
 
 set.seed(1)
+df$mcare[is.na(df$mcare)]=0
+df$mcaid[is.na(df$mcaid)]=0
+
 match.it <- matchit(group ~ baseline_age + female + black + yrsdiab, data = df, method="nearest", replace = T, caliper = 0.01, ratio = 1)
 a <- summary(match.it)
 matcheddf <- match.data(match.it)
@@ -707,11 +767,21 @@ knitr::kable(table3,
 
 ```{r diff}
 
-pairsdf = cbind(df[row.names(match.it$match.matrix),"wt"], df[match.it$match.matrix,"unitsperday"], df[row.names(match.it$match.matrix),"hba1c"],
+pairsdf = cbind(df[row.names(match.it$match.matrix),"wt"],
+                df[match.it$match.matrix,"unitsperday"], 
+                df[row.names(match.it$match.matrix),"hba1c"],
                 df[row.names(match.it$match.matrix),"baseline_age"],
                 df[row.names(match.it$match.matrix),"female"],
                 df[row.names(match.it$match.matrix),"black"],
-                df[row.names(match.it$match.matrix),"postoral"])
+                df[row.names(match.it$match.matrix),"postoral"],
+                df[row.names(match.it$match.matrix),"screat"],
+                df[row.names(match.it$match.matrix),"alt"],
+                df[row.names(match.it$match.matrix),"yrsdiab"],
+                df[row.names(match.it$match.matrix),"hisp"],
+                df[row.names(match.it$match.matrix),"pir"],
+                df[row.names(match.it$match.matrix),"wc"],
+                df[row.names(match.it$match.matrix),"mcare"],
+                df[row.names(match.it$match.matrix),"mcaid"])
 
 # pairsdf[,2][pairsdf[,2]>(mean(pairsdf[,2],na.rm=T)+sd(pairsdf[,2],na.rm=T))] = mean(pairsdf[,2])
 # pairsdf[,1][pairsdf[,1]>(mean(pairsdf[,1],na.rm=T)+sd(pairsdf[,1],na.rm=T))] = mean(pairsdf[,1])
@@ -725,6 +795,7 @@ a1c_before_orals = pairdfsub[,3]
 # dfn$DIQ050[is.na(dfn$DIQ050)] = 9
 # dfn$DIQ010[is.na(dfn$DIQ010)] = 9
 
+
 a1c_after_orals = pairdfsub[,7]
 a1c_after_orals[a1c_after_orals==0] = a1c_before_orals[a1c_after_orals==0]
 
@@ -733,8 +804,19 @@ wt = pairdfsub[,1]
 age = pairdfsub[,4]
 fem = pairdfsub[,5]
 blk = pairdfsub[,6]
+scr = pairdfsub[,8]
+alt = pairdfsub[,9]
+yrsdiab = pairdfsub[,10]
+hisp = pairdfsub[,11]
+pir = pairdfsub[,12]
+wc = pairdfsub[,13]
+mcare = pairdfsub[,14]
+mcaid = pairdfsub[,15]
 
-
+egfr = 175 * ((scr)^(-1.154)) * ((age)^(-0.203)) * (0.742*(fem==1)+1*(fem==0)) * (1.212 *(blk==1)+1*(blk==0))
+ckd = egfr<60
+cld = alt>56
+  
 need = (0.6419)*wt
 summary(need)
 
@@ -742,8 +824,7 @@ used = pairdfsub[,2]
 
 summary(used)
 diff_disp_minus_need = used - need
-table(overrx==1)
-table(underrx==1)
+
 
 summary(diff_disp_minus_need)
 quantile(diff_disp_minus_need,c(.025,.975),na.rm=T)
@@ -753,7 +834,9 @@ quantile(diff_disp_minus_need,c(.025,.975),na.rm=T)
 overrx = (used>(need+2*sd(need)))&(need>0)
 underrx = (used<(need-2*sd(need)))&(need>0)
            
-         
+table(overrx==1)
+table(underrx==1)
+
 sum(underrx==1)/length(diff_disp_minus_need)
 summary(diff_disp_minus_need[underrx==1])
 quantile(diff_disp_minus_need[underrx==1],c(.025,.975),na.rm=T)
@@ -805,6 +888,29 @@ quantile(age[underrx==1],c(.025,.975),na.rm=T)
 summary(age[overrx==1])
 quantile(age[overrx==1],c(.025,.975),na.rm=T)
 
+
+summary(yrsdiab[underrx==1])
+quantile(yrsdiab[underrx==1],c(.025,.975),na.rm=T)
+
+summary(yrsdiab[overrx==1])
+quantile(yrsdiab[overrx==1],c(.025,.975),na.rm=T)
+
+
+summary(pir[underrx==1])
+quantile(pir[underrx==1],c(.025,.975),na.rm=T)
+
+summary(pir[overrx==1])
+quantile(pir[overrx==1],c(.025,.975),na.rm=T)
+
+
+summary(wc[underrx==1])
+quantile(wc[underrx==1],c(.025,.975),na.rm=T)
+
+summary(wc[overrx==1])
+quantile(wc[overrx==1],c(.025,.975),na.rm=T)
+
+
+
 table(fem[underrx==1])
 table(fem[underrx==1])/length(fem[underrx==1])
 
@@ -817,7 +923,39 @@ table(blk[underrx==1])/length(blk[underrx==1])
 table(blk[overrx==1])
 table(blk[overrx==1])/length(blk[overrx==1])
 
+table(hisp[underrx==1])
+table(hisp[underrx==1])/length(hisp[underrx==1])
 
+table(hisp[overrx==1])
+table(hisp[overrx==1])/length(hisp[overrx==1])
+
+table(mcare[underrx==1])
+table(mcare[underrx==1])/length(mcare[underrx==1])
+
+table(mcare[overrx==1])
+table(mcare[overrx==1])/length(mcare[overrx==1])
+
+
+table(mcaid[underrx==1])
+table(mcaid[underrx==1])/length(mcaid[underrx==1])
+
+table(mcaid[overrx==1])
+table(mcaid[overrx==1])/length(mcaid[overrx==1])
+
+
+table(ckd[underrx==1])
+table(ckd[underrx==1])/length(ckd[underrx==1])
+
+table(ckd[overrx==1])
+table(ckd[overrx==1])/length(ckd[overrx==1])
+
+
+
+table(cld[underrx==1])
+table(cld[underrx==1])/length(cld[underrx==1])
+
+table(cld[overrx==1])
+table(cld[overrx==1])/length(cld[overrx==1])
 
 
 save.image("USinsulin")
